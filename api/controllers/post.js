@@ -14,11 +14,18 @@ function getPostList (req, res, next) {
 }
 
 function createPost (req, res, next) {
-    const newPost = new Post({ username: req.body.username, text: req.body.text })
-    newPost.save(function (err) {
+    let {username, text} = req.body;
+    let isUsernameValid = /^[0-9a-zA-Z]+$/.test(username);
+    let isTextValid = text.length < 200 && text.length > 0;
+    if (isUsernameValid && isTextValid) {
+        const newPost = new Post({ username: username, text: text })
+        newPost.save(function (err) {
         if (err) {
-            res.json({message: err.message}).status(500);
+            res.status(500).json({message: err.message});
         }
-        res.json({ success: 1, description: 'post created' })
-    })
+            res.json({ success: 1, description: 'post created' })
+        })
+    } else {
+        res.status(500).json({message: 'Username must contain only letters and digits. Text length must be less then 200'})
+    }
 }
